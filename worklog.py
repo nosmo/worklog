@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import os
+import sys
 
 import yaml
 
@@ -29,6 +30,11 @@ def main():
     else:
         #todo log
         #todo confirm creating new blank log
+        input_str = input("Worklog appears to be empty - please type y to create a new one\n")
+        if input_str.strip() != "y":
+            print("Not creating new worklog - exiting")
+            return 1
+
         current_log = {}
 
     now = datetime.datetime.now()
@@ -41,5 +47,7 @@ def main():
 
     print("Logged message at {:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second))
 
+    return 0
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

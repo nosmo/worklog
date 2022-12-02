@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import fileinput
 import os
 import sys
 
@@ -12,13 +13,25 @@ WORKLOG_F = "~/.worklog.yaml"
 def main():
 
     msg = "Work logging script"
-    parser = argparse.ArgumentParser(description=msg)
-    #TODO default to reading from stdin
-    parser.add_argument(nargs=1,
+    parser = argparse.ArgumentParser(description=msg,
+                                     epilog='Worklog entry can be provided via stdin or commandline')
+
+    parser.add_argument(nargs="?",
                         dest="log_msg",
                         help="message to be added to worklog")
 
+    parser.add_argument("--tee",
+                        action="store_true",
+                        required=False,
+                        help="tee-like: print input from stdin")
+
     args = parser.parse_args()
+
+    message = args.log_msg
+    if not args.log_msg:
+        message = sys.stdin.read()
+        if args.tee:
+            print(message)
 
     worklog_path = os.path.expanduser(WORKLOG_F)
 
@@ -40,7 +53,7 @@ def main():
     now = datetime.datetime.now()
     ymd = "{}-{}-{}".format(now.year, now.month, now.day)
     today_log = current_log.setdefault(ymd, {})
-    current_log[ymd]["{:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second)] = args.log_msg
+    current_log[ymd]["{:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second)] = message
 
     with open(os.path.expanduser(worklog_path), "w") as worklog_f:
         yaml.dump(current_log, stream=worklog_f)

@@ -25,6 +25,12 @@ def main():
                         required=False,
                         help="tee-like: print input from stdin")
 
+
+    parser.add_argument('-T', '--tag',
+                        action="append",
+                        default=[],
+                        help="Tags to associate with this entry")
+
     args = parser.parse_args()
 
     message = args.log_msg
@@ -53,7 +59,9 @@ def main():
     now = datetime.datetime.now()
     ymd = "{}-{}-{}".format(now.year, now.month, now.day)
     today_log = current_log.setdefault(ymd, {})
-    current_log[ymd]["{:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second)] = message
+    time_str = "{:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second)
+    current_log[ymd][time_str] = {"entry": message,
+                                  "tags": args.tag}
 
     with open(os.path.expanduser(worklog_path), "w") as worklog_f:
         yaml.dump(current_log, stream=worklog_f)
